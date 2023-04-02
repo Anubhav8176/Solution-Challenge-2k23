@@ -7,31 +7,38 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.io.ObjectInputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
 
-
+    LatLng locationPassed;
     ArrayList<String> HospitalLists;
     String Location;
     ArrayAdapter arrayAdapter;
     ListView hospitalsAround;
     LocationManager locationManager;
     LocationListener locationListener;
-    double latitude, longitude;
+    double rawLatitude, rawLongitude, latitude, longitude;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -68,23 +75,44 @@ public class MainActivity extends AppCompatActivity {
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(@NonNull Location location) {
-                Log.i("Location", "mill gyi location "+location.toString());
-                latitude = location.getLatitude();
-                longitude = location.getLongitude();
-                HospitalLists.add("The latitude "+latitude+" The longitude "+longitude);
-                Log.i("Latitude aur Longitude", "Yeh bhi mill gaye: Latitude: "+latitude+"Longitude"+longitude);
-                //Log.i("The List is:", "Mill hi gyi hai string mie "+latitude+","+longitude);
-                //endGPS();
+
+                rawLatitude = location.getLatitude();
+                rawLongitude = location.getLongitude();
+
+
+                latitude = BigDecimal.valueOf(rawLatitude).setScale(3, RoundingMode.HALF_UP).doubleValue();
+                longitude = BigDecimal.valueOf(rawLongitude).setScale(3, RoundingMode.HALF_UP).doubleValue();
+
+                locationPassed = new LatLng(rawLatitude, rawLongitude);
+
+                String LocationInString = String.valueOf(latitude)+" "+String.valueOf(longitude);
+
+                Log.i("The user Location is: ", LocationInString);
+                HospitalLists.add("The current user location is: "+LocationInString);
+                hospitalsAround.setAdapter(arrayAdapter);
+                endGPS();
             }
         };
-        hospitalsAround.setAdapter(arrayAdapter);
-        Log.i("The List is:", "Mill hi gyi hai string mie "+latitude+","+longitude);
+
 
         if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         }else{
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,0, 0,locationListener);
         }
+
+
+        hospitalsAround.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if(position == HospitalLists.size() - 1) {
+                    Intent intent = new Intent(getApplicationContext(), HospitalLocation.class);
+                    intent.putExtra("Location", locationPassed);
+                    startActivity(intent);
+                }
+            }
+        });
+
     }
 
     //The function will end the continues updation of the user Location.
@@ -96,4 +124,5 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
 }

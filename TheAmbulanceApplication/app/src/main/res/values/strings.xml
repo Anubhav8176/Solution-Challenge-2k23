@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">My Application</string>
     <string name="title_activity_hospital_location">HospitalLocation</string>
+    <string name="title_activity_hospital_list">HospitalList</string>
 </resources>
