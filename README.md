@@ -13,4 +13,4 @@ D:\Solution Challenge 2k23\TheAmbulanceApplication\app\build\outputs\apk\debug
 You will find the file  apk-debug.apk 
 just simply install it on the desired devicee
 
-I will provide the separately too.
+I will provide the separately too in the main folder file name apk-debug.apk.
